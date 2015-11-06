@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 
@@ -51,6 +52,37 @@ namespace SerialPortTest
 
             return rxString;
         }
+		
+		/// <summary>
+        /// From http://stackoverflow.com/questions/434494/serial-port-rs232-in-mono-for-multiple-platforms
+        /// </summary>
+        /// <returns></returns>
+        private static List<string> GetPortNames()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            List<string> serial_ports = new List<string>();
+
+            // Are we on Unix?
+            if (p == 4 || p == 128 || p == 6)
+            {
+                string[] ttys = System.IO.Directory.GetFiles("/dev/", "tty*");
+                foreach (string dev in ttys)
+                {
+                    //Arduino MEGAs show up as ttyACM due to their different USB<->RS232 chips
+                    if (dev.StartsWith("/dev/ttyS") || dev.StartsWith("/dev/ttyUSB") || dev.StartsWith("/dev/ttyACM"))
+                    {
+                        serial_ports.Add(dev);
+                    }
+                }
+            }
+            else
+            {
+                serial_ports.AddRange(SerialPort.GetPortNames());
+            }
+
+            return serial_ports;
+        }
+        
 
 
     }
